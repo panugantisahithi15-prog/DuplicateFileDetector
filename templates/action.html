@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Duplicates – Duplicate File Manager{% endblock %}
+
+{% block content %}
+<div class="action-layout">
+
+    <!-- Minimal navbar for non-hero pages -->
+    <div class="navbar-wrap" style="margin-bottom:32px;">
+        <nav class="navbar" aria-label="Main navigation">
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('service') }}">Service</a>
+            <a href="{{ url_for('action') }}" class="active">Action</a>
+            <a href="{{ url_for('about') }}">About</a>
+        </nav>
+    </div>
+
+    {% if not result %}
+    <!-- No scan result: prompt user to scan first -->
+    <div class="state-msg">
+        <div class="emoji">📂</div>
+        <p>No scan result loaded.</p>
+        <p style="margin-top:12px;">
+            <a href="{{ url_for('service') }}" class="btn btn-primary" style="display:inline-flex;">
+                ← Scan a folder
+            </a>
+        </p>
+    </div>
+
+    {% elif not group %}
+    <!-- Scan loaded but no specific group selected: show all groups -->
+    <h2>Manage Duplicates</h2>
+    <p class="sub">
+        {{ result.group_count }} group(s) found · {{ result.wasted_human }} can be freed
+    </p>
+
+    <div class="groups-list">
+        {% for g in result.groups %}
+        <div class="group-card">
+            <div class="group-card-header">
+                <span class="group-num">Group #{{ loop.index }}</span>
+                <span class="group-meta">{{ g.count }} copies · {{ g.files[0].size_human }} each</span>
+                <span class="wasted-badge">{{ g.wasted_human }} wasted</span>
+                <a href="{{ url_for('action', scan_id=scan_id, group_id=g.group_id) }}"
+                   class="btn btn-primary manage-btn">Manage →</a>
+            </div>
+            <ul class="file-list">
+                {% for f in g.files %}
+                <li class="file-row">
+                    <span class="file-icon">📄</span>
+                    <div class="file-paths">
+                        <div class="file-folder">{{ f.folder }}</div>
+                        <div class="file-name">{{ f.name }}</div>
+                    </div>
+                    <div class="file-meta">{{ f.mtime_human }}</div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <!-- Specific group: full action controls -->
+    <div style="margin-bottom:8px;">
+        <a href="{{ url_for('action', scan_id=scan_id) }}" style="font-size:.85rem;color:var(--text-dim);">
+            ← Back to all groups
+        </a>
+    </div>
+
+    <h2>Group – {{ group.count }} copies</h2>
+    <p class="sub">
+        {{ group.files[0].size_human }} each · {{ group.wasted_human }} can be freed
+        by keeping one copy and trashing the rest.
+    </p>
+
+    <div class="card">
+        <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:16px;font-weight:600;">
+            ⬇ Keep whichever file(s) you need. Trash the duplicates.
+            Files go to the Recycle Bin – you can restore them if needed.
+        </p>
+
+        <ul class="file-list" style="margin:0 -24px;">
+            {% for f in group.files %}
+            <li class="action-file-row">
+
+                <div class="file-paths">
+                    <div class="file-folder">{{ f.folder }}</div>
+                    <div class="file-name">{{ f.name }}</div>
+                    <div class="file-meta" style="margin-top:2px;">{{ f.mtime_human }}</div>
+
+                    <!-- Inline rename form (hidden by default) -->
+                    <form id="rename-form-{{ loop.index0 }}"
+                          action="{{ url_for('action_rename') }}"
+                          method="POST"
+                          class="rename-form"
+                          style="display:none;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="scan_id"    value="{{ scan_id }}">
+                        <input type="hidden" name="group_id"   value="{{ group.group_id }}">
+                        <input type="hidden" name="file_index" value="{{ loop.index0 }}">
+                        <input type="text"
+                               name="new_name"
+                               class="rename-input"
+                               placeholder="{{ f.name }}"
+                               aria-label="New file name">
+                        <button type="submit" class="btn btn-primary" style="padding:6px 14px;font-size:.82rem;">
+                            Rename
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Action buttons -->
+                <div class="actions">
+                    <!-- Rename toggle -->
+                    <button class="btn btn-ghost rename-toggle"
+                            style="padding:6px 14px;font-size:.82rem;"
+                            data-target="rename-form-{{ loop.index0 }}">
+                        ✏️ Rename
+                    </button>
+
+                    <!-- Trash (only enabled when 2+ files remain) -->
+                    {% if group.files | length > 1 %}
+                    <form action="{{ url_for('action_trash') }}" method="POST" style="display:inline;"
+                          data-filename="{{ f.name }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="scan_id"    value="{{ scan_id }}">
+                        <input type="hidden" name="group_id"   value="{{ group.group_id }}">
+                        <input type="hidden" name="file_index" value="{{ loop.index0 }}">
+                        <button type="submit"
+                                class="btn btn-danger trash-btn"
+                                style="padding:6px 14px;font-size:.82rem;">
+                            🗑️ Trash
+                        </button>
+                    </form>
+                    {% else %}
+                    <span class="btn btn-danger"
+                          style="padding:6px 14px;font-size:.82rem;opacity:.4;cursor:not-allowed;"
+                          title="Cannot trash the only remaining copy.">
+                        🗑️ Trash
+                    </span>
+                    {% endif %}
+                </div>
+
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <!-- ── Action log ── -->
+    {% if action_log %}
+    <div class="action-log">
+        <h3>Action log</h3>
+        {% for rec in action_log | reverse %}
+        <div class="log-row">
+            <span class="log-badge">{{ rec.action }}</span>
+            <span style="font-family:var(--mono);font-size:.8rem;word-break:break-all;">
+                {{ rec.original_path }}
+                {% if rec.new_path %} → {{ rec.new_path }}{% endif %}
+            </span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+</div><!-- /action-layout -->
+
+{% block extra_js %}
+<script>
+/* Confirm before trashing */
+document.querySelectorAll('form[data-filename] .trash-btn').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+        var form = btn.closest('form');
+        var name = form.dataset.filename || 'this file';
+        if (!confirm('Move to Recycle Bin?\n\n' + name)) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}
+
+{% endblock %}

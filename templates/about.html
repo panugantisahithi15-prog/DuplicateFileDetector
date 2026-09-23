@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}About – Duplicate File Manager{% endblock %}
+
+{% block content %}
+<div class="about-layout">
+
+    <!-- Minimal navbar -->
+    <div class="navbar-wrap" style="margin-bottom:40px;">
+        <nav class="navbar" aria-label="Main navigation">
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('service') }}">Service</a>
+            <a href="{{ url_for('action') }}">Action</a>
+            <a href="{{ url_for('about') }}" class="active">About</a>
+        </nav>
+    </div>
+
+    <h1>Duplicate File Manager</h1>
+    <p class="tagline">
+        A local Flask web app that finds and safely manages duplicate files
+        on your computer, using content-based comparison (MD5 hashing).
+    </p>
+
+    <!-- ── How it works ── -->
+    <h2>How it works</h2>
+    <p>
+        The scanner uses a multi-stage pipeline so it only hashes files that
+        could actually be duplicates, keeping scans fast even on large folders.
+    </p>
+
+    <div class="pipeline">
+        <div class="pipeline-step">Walk the folder tree</div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step">Group by size</div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step">Partial hash (first 64 KB)</div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step">Full MD5 hash</div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step">Results &amp; actions</div>
+    </div>
+
+    <p>
+        Files with different sizes can never be duplicates, so they are
+        discarded before any hashing happens. Of the remaining candidates,
+        only the first 64 KB is hashed first – if those don't match, the full
+        hash is skipped. This cuts unnecessary disk reads by most of the way.
+    </p>
+
+    <!-- ── Safety ── -->
+    <h2>Safety</h2>
+    <p>
+        Deleting the wrong file is irreversible. This app takes several
+        precautions:
+    </p>
+    <ul style="line-height:1.9;padding-left:24px;">
+        <li>
+            Files are sent to the <strong>Recycle Bin</strong> (via
+            <code>send2trash</code>), never permanently deleted.
+        </li>
+        <li>
+            The server enforces <strong>"keep at least one copy"</strong> –
+            the last file in a group cannot be trashed.
+        </li>
+        <li>
+            Every file is <strong>re-verified</strong> (exists + hash matches)
+            immediately before it is trashed.
+        </li>
+        <li>
+            File paths are <strong>never accepted from the browser</strong>.
+            The client sends IDs; the server looks up the real path from the
+            stored scan result.
+        </li>
+        <li>
+            Every POST that modifies files is protected by a
+            <strong>CSRF token</strong> (Flask-WTF).
+        </li>
+        <li>
+            The app binds to <strong>127.0.0.1 only</strong> – it is not
+            reachable from other machines on the network.
+        </li>
+    </ul>
+
+    <!-- ── Tech stack ── -->
+    <h2>Tech stack</h2>
+    <ul style="line-height:1.9;padding-left:24px;">
+        <li>Python 3.13 + Flask 3</li>
+        <li>Flask-WTF for CSRF protection</li>
+        <li>send2trash for safe deletion</li>
+        <li>pytest for the test suite (14 tests)</li>
+        <li>Pure HTML + CSS (no framework) – design matches a Canva mockup</li>
+    </ul>
+
+    <!-- ── Why MD5? ── -->
+    <h2>Why MD5?</h2>
+    <p>
+        MD5 is fast and more than accurate enough for finding accidental
+        duplicates on a local disk. The probability of two different files
+        having the same MD5 is astronomically low, and this app is not
+        used in a security context where a malicious actor could craft a
+        collision. If you are concerned, the code can be updated to use
+        SHA-256 with a one-line change in <code>detector/hasher.py</code>.
+    </p>
+
+    <!-- ── Hardlinks ── -->
+    <h2>Hardlinks</h2>
+    <p>
+        Two paths that point to the same file on disk (hardlinks) have
+        identical content but are <em>not</em> duplicates – deleting one
+        would destroy the only real data. The scanner deduplicates by
+        <code>(device, inode)</code> so hardlinks are never reported as
+        duplicates. On Windows NTFS, real inode numbers are obtained via
+        <code>os.stat()</code> rather than the cheaper <code>DirEntry.stat()</code>,
+        which returns 0.
+    </p>
+
+</div><!-- /about-layout -->
+{% endblock %}

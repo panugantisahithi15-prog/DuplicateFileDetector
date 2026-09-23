@@ -1,0 +1,65 @@
+{# _hero.html – hero macro
+   Usage:
+       {% from "partials/_hero.html" import hero %}
+       {% call hero(page_name) %}
+           ... card HTML goes here ...
+       {% endcall %}
+#}
+{% macro hero(page_name) %}
+<section class="hero">
+
+    <!-- Decorative folder icons -->
+    <img src="{{ url_for('static', filename='images/folder.png') }}"
+         class="folder-icon top-right float-icon"
+         alt="" role="presentation">
+    <img src="{{ url_for('static', filename='images/folder.png') }}"
+         class="folder-icon mid-left float-icon"
+         alt="" role="presentation">
+
+    <div class="hero-content">
+
+        <!-- Navbar -->
+        <div class="navbar-wrap">
+            <nav class="navbar" aria-label="Main navigation">
+                <a href="{{ url_for('home') }}"    {% if page_name == 'home' %}class="active"{% endif %}>Home</a>
+                <a href="{{ url_for('service') }}" {% if page_name == 'service' %}class="active"{% endif %}>Service</a>
+                <a href="{{ url_for('action') }}"  {% if page_name == 'action' %}class="active"{% endif %}>Action</a>
+                <a href="{{ url_for('about') }}"   {% if page_name == 'about' %}class="active"{% endif %}>About</a>
+            </nav>
+        </div>
+
+        <!-- Body row: heading left | card right -->
+        <div class="hero-body">
+
+            <!-- Left: heading -->
+            <div class="hero-body-left">
+                <h1 class="hero-heading">
+                    <span class="line1">WHAT'S INSIDE</span>
+                    <span class="line2">THE FOLDER</span>
+                </h1>
+            </div>
+
+            <!-- Right: caller-provided card -->
+            <div class="hero-body-right">
+                {{ caller() }}
+            </div>
+
+        </div>
+
+    </div><!-- /hero-content -->
+
+    <!-- Photo stack + folder pocket -->
+    <div class="bottom-section">
+        <div class="photo-stack">
+            <img src="{{ url_for('static', filename='images/photo1.jpeg') }}"
+                 class="photo" alt="Photo 1">
+            <img src="{{ url_for('static', filename='images/photo2.jpeg') }}"
+                 class="photo" alt="Photo 2">
+            <img src="{{ url_for('static', filename='images/photo3.jpeg') }}"
+                 class="photo" alt="Photo 3">
+        </div>
+        <div class="folder-pocket" aria-hidden="true"></div>
+    </div>
+
+</section>
+{% endmacro %}

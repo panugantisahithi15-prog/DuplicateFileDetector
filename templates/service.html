@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% from "partials/_hero.html" import hero %}
+
+{% block title %}Scan a Folder – Duplicate File Manager{% endblock %}
+
+{% block content %}
+
+{# ── Hero with scan card ── #}
+{% call hero("service") %}
+    <div class="scan-card">
+        <div class="scan-card-header">📂 Scan a folder</div>
+        <div class="scan-card-body">
+            <form method="POST" id="scan-form" novalidate>
+                {{ form.hidden_tag() }}
+
+                <div>
+                    <label for="folder" style="font-size:.82rem;font-weight:600;margin-bottom:6px;display:block;">
+                        Folder path
+                    </label>
+                    {{ form.folder(
+                        id="folder",
+                        class="input-field",
+                        placeholder="e.g. C:\\Users\\You\\Pictures",
+                        autocomplete="off",
+                        value=form.folder.data or ""
+                    ) }}
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="scan-btn">
+                    <span class="spinner" aria-hidden="true"></span>
+                    <span class="btn-text">🔍 Scan</span>
+                </button>
+            </form>
+        </div>
+    </div>
+{% endcall %}
+
+{# ── Results section (appears after a scan) ── #}
+{% if result is not none %}
+<div class="results-section" id="results-section">
+
+    {# ── Summary bar ── #}
+    {% if result.error is none %}
+    <div class="summary-bar">
+        <div class="stat-tile">
+            <div class="value">{{ result.total_files }}</div>
+            <div class="label">Files scanned</div>
+        </div>
+        <div class="stat-tile">
+            <div class="value">{{ result.group_count }}</div>
+            <div class="label">Duplicate groups</div>
+        </div>
+        <div class="stat-tile">
+            <div class="value">{{ result.wasted_human }}</div>
+            <div class="label">Space to free</div>
+        </div>
+        <div class="stat-tile">
+            <div class="value">{{ result.duration_human }}</div>
+            <div class="label">Scan time</div>
+        </div>
+    </div>
+    {% endif %}
+
+    {# ── Error state ── #}
+    {% if result.error %}
+    <div class="state-msg">
+        <div class="emoji">❌</div>
+        <p>{{ result.error }}</p>
+    </div>
+
+    {# ── Empty state ── #}
+    {% elif result.groups | length == 0 %}
+    <div class="state-msg">
+        <div class="emoji">✅</div>
+        <p><strong>No duplicate files found.</strong><br>Your folder is clean.</p>
+    </div>
+
+    {# ── Groups ── #}
+    {% else %}
+    <div class="groups-list">
+        {% for group in result.groups %}
+        <div class="group-card">
+            <div class="group-card-header">
+                <span class="group-num">Group #{{ loop.index }}</span>
+                <span class="group-meta">
+                    {{ group.count }} copies · {{ group.files[0].size_human }} each
+                </span>
+                <span class="wasted-badge">{{ group.wasted_human }} wasted</span>
+                {% if scan_id %}
+                <a href="{{ url_for('action', scan_id=scan_id, group_id=group.group_id) }}"
+                   class="btn btn-primary manage-btn">Manage →</a>
+                {% endif %}
+            </div>
+
+            <ul class="file-list">
+                {% for f in group.files %}
+                <li class="file-row">
+                    <span class="file-icon">📄</span>
+                    <div class="file-paths">
+                        <div class="file-folder">{{ f.folder }}</div>
+                        <div class="file-name">{{ f.name }}</div>
+                    </div>
+                    <div class="file-meta">{{ f.mtime_human }}</div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {# ── Skipped files (collapsible) ── #}
+    {% if result.skipped %}
+    <details style="margin-top:20px;">
+        <summary style="cursor:pointer;font-size:.85rem;color:var(--text-dim);font-weight:600;">
+            ⚠️ {{ result.skipped | length }} file(s) could not be read (click to expand)
+        </summary>
+        <ul style="margin-top:8px;list-style:none;">
+            {% for sk in result.skipped %}
+            <li style="font-size:.78rem;color:var(--text-dim);padding:2px 0;font-family:var(--mono);">
+                {{ sk.path }} — {{ sk.reason }}
+            </li>
+            {% endfor %}
+        </ul>
+    </details>
+    {% endif %}
+
+</div><!-- /results-section -->
+{% endif %}
+
+{% endblock %}

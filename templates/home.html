@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% from "partials/_hero.html" import hero %}
+
+{% block title %}Duplicate File Manager – Home{% endblock %}
+
+{% block content %}
+{% call hero("home") %}
+    <!-- Info card (home page only) -->
+    <div class="info-card">
+        <div class="info-card-row highlight">Moments worth keeping</div>
+        <div class="info-card-row">Little things that matter</div>
+        <div class="info-card-row">Memories I love</div>
+    </div>
+{% endcall %}
+{% endblock %}
