@@ -20,10 +20,15 @@
                     {{ form.folder(
                         id="folder",
                         class="input-field",
-                        placeholder="e.g. C:\\Users\\You\\Pictures",
+                        placeholder="C:\\Users\\You\\Pictures",
                         autocomplete="off",
                         value=form.folder.data or ""
                     ) }}
+                    {% if form.folder.errors %}
+                        {% for err in form.folder.errors %}
+                        <p style="color:var(--error-text);font-size:.78rem;margin-top:4px;">{{ err }}</p>
+                        {% endfor %}
+                    {% endif %}
                 </div>
 
                 <button type="submit" class="btn btn-primary" id="scan-btn">
@@ -35,12 +40,20 @@
     </div>
 {% endcall %}
 
-{# ── Results section (appears after a scan) ── #}
+{# ── Results section (appears after a successful POST) ── #}
 {% if result is not none %}
 <div class="results-section" id="results-section">
 
+    {# ── Error state ── #}
+    {% if result.error %}
+    <div class="state-msg">
+        <div class="emoji">❌</div>
+        <p><strong>{{ result.error }}</strong></p>
+    </div>
+
+    {% else %}
+
     {# ── Summary bar ── #}
-    {% if result.error is none %}
     <div class="summary-bar">
         <div class="stat-tile">
             <div class="value">{{ result.total_files }}</div>
@@ -59,31 +72,37 @@
             <div class="label">Scan time</div>
         </div>
     </div>
-    {% endif %}
-
-    {# ── Error state ── #}
-    {% if result.error %}
-    <div class="state-msg">
-        <div class="emoji">❌</div>
-        <p>{{ result.error }}</p>
-    </div>
 
     {# ── Empty state ── #}
-    {% elif result.groups | length == 0 %}
+    {% if result.groups | length == 0 %}
     <div class="state-msg">
         <div class="emoji">✅</div>
-        <p><strong>No duplicate files found.</strong><br>Your folder is clean.</p>
+        <p><strong>No duplicate files found.</strong></p>
+        <p style="margin-top:8px;font-size:.9rem;color:var(--text-dim);">Your folder is clean.</p>
     </div>
 
     {# ── Groups ── #}
     {% else %}
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+        <h2 style="font-size:1.2rem;font-weight:800;letter-spacing:-.02em;">
+            {{ result.group_count }} duplicate group{{ 's' if result.group_count != 1 }}
+        </h2>
+        {% if scan_id %}
+        <a href="{{ url_for('action', scan_id=scan_id) }}"
+           class="btn btn-primary" style="font-size:.85rem;padding:8px 20px;">
+            Manage all →
+        </a>
+        {% endif %}
+    </div>
+
     <div class="groups-list">
         {% for group in result.groups %}
         <div class="group-card">
             <div class="group-card-header">
                 <span class="group-num">Group #{{ loop.index }}</span>
                 <span class="group-meta">
-                    {{ group.count }} copies · {{ group.files[0].size_human }} each
+                    {{ group.count }} copies &middot;
+                    {{ group.files[0].size_human }} each
                 </span>
                 <span class="wasted-badge">{{ group.wasted_human }} wasted</span>
                 {% if scan_id %}
@@ -95,7 +114,16 @@
             <ul class="file-list">
                 {% for f in group.files %}
                 <li class="file-row">
-                    <span class="file-icon">📄</span>
+                    <span class="file-icon" aria-hidden="true">
+                        {%- set ext = f.name.rsplit('.', 1)[-1].lower() if '.' in f.name else '' -%}
+                        {%- if ext in ('jpg','jpeg','png','gif','webp','bmp','svg','heic') -%}🖼️
+                        {%- elif ext in ('mp4','mov','avi','mkv','wmv','flv') -%}🎬
+                        {%- elif ext in ('mp3','wav','flac','aac','ogg','m4a') -%}🎵
+                        {%- elif ext in ('pdf',) -%}📕
+                        {%- elif ext in ('zip','rar','7z','tar','gz') -%}📦
+                        {%- elif ext in ('py','js','ts','html','css','java','cpp','c') -%}💻
+                        {%- else -%}📄{%- endif -%}
+                    </span>
                     <div class="file-paths">
                         <div class="file-folder">{{ f.folder }}</div>
                         <div class="file-name">{{ f.name }}</div>
@@ -109,16 +137,20 @@
     </div>
     {% endif %}
 
+    {% endif %}{# /result.error #}
+
     {# ── Skipped files (collapsible) ── #}
     {% if result.skipped %}
-    <details style="margin-top:20px;">
-        <summary style="cursor:pointer;font-size:.85rem;color:var(--text-dim);font-weight:600;">
-            ⚠️ {{ result.skipped | length }} file(s) could not be read (click to expand)
+    <details style="margin-top:24px;">
+        <summary style="cursor:pointer;font-size:.85rem;color:var(--text-dim);font-weight:600;user-select:none;">
+            ⚠️ {{ result.skipped | length }} file{{ 's' if result.skipped | length != 1 }}
+            could not be read — click to expand
         </summary>
-        <ul style="margin-top:8px;list-style:none;">
+        <ul style="margin-top:10px;list-style:none;padding-left:4px;">
             {% for sk in result.skipped %}
-            <li style="font-size:.78rem;color:var(--text-dim);padding:2px 0;font-family:var(--mono);">
-                {{ sk.path }} — {{ sk.reason }}
+            <li style="font-size:.78rem;color:var(--text-dim);padding:3px 0;font-family:var(--mono);">
+                <strong style="color:var(--text);">{{ sk.path }}</strong>
+                &mdash; {{ sk.reason }}
             </li>
             {% endfor %}
         </ul>
