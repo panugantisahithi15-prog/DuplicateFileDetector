@@ -43,56 +43,39 @@ body {
 img { max-width: 100%; display: block; }
 a   { color: inherit; text-decoration: none; }
 
-/* ── Navbar ── */
+/* ── Navbar pill ── */
 .navbar {
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 0;
     background: var(--card-bg);
     border-radius: var(--radius-pill);
     box-shadow: var(--shadow-sm);
     padding: 10px 6px;
-    position: relative;
     width: fit-content;
-    margin: 0 auto;
 }
 
 .navbar a {
     font-weight: 600;
     font-size: .9rem;
-    padding: 6px 20px;
+    padding: 6px 22px;
     border-radius: var(--radius-pill);
     color: var(--text);
     transition: background .15s, color .15s;
     white-space: nowrap;
 }
 
-.navbar a + a {
-    border-left: 1px solid #e0e0e0;
-}
+.navbar a + a          { border-left: 1px solid #e0e0e0; }
+.navbar a:hover        { background: var(--accent); }
+.navbar a.active       { background: var(--accent); }
 
-.navbar a:hover          { background: var(--accent); }
-.navbar a.active         { background: var(--accent); }
-
-/* Speech-bubble arrow under the navbar */
+/* ── navbar-wrap: centering container used on non-hero pages too ── */
+/* Hero pages override this in hero.css; action/about use it as-is */
 .navbar-wrap {
-    position: relative;
     display: flex;
-    justify-content: flex-start;
-    padding-left: 20px;
-    padding-top: 24px;
-}
-.navbar-wrap::after {
-    content: '';
-    position: absolute;
-    bottom: -10px;
-    left: 60px;
-    width: 0; height: 0;
-    border-left: 10px solid transparent;
-    border-right: 10px solid transparent;
-    border-top: 10px solid var(--card-bg);
-    filter: drop-shadow(0 2px 2px rgba(0,0,0,.1));
+    justify-content: center;
+    padding-top: 28px;
+    padding-bottom: 0;
 }
 
 /* ── Flash messages ── */
@@ -167,22 +150,7 @@ a   { color: inherit; text-decoration: none; }
 .btn.loading .spinner { display: inline-block; }
 .btn.loading .btn-text { display: none; }
 
-/* ── Floating animation (folder icons) ── */
-@keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50%       { transform: translateY(-10px); }
-}
-.float-icon {
-    animation: float 5s ease-in-out infinite;
-    pointer-events: none;
-    user-select: none;
-}
-@media (prefers-reduced-motion: reduce) {
-    .float-icon { animation: none; }
-}
-
 /* ── Responsive ── */
 @media (max-width: 700px) {
-    .navbar-wrap { padding-left: 12px; }
     .navbar a { padding: 6px 12px; font-size: .82rem; }
 }

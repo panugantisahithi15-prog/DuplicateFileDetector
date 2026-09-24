@@ -1,11 +1,5 @@
 /* ============================================================
-   hero.css  –  Canva-matching hero layout
-   The hero contains:
-     • navbar (top-left)
-     • big heading
-     • right-aligned info/scan card
-     • decorative folder icons (absolute, inside .hero)
-     • photo stack + folder pocket (bottom)
+   hero.css  –  Hero layout
    ============================================================ */
 
 /* ── Hero wrapper ── */
@@ -14,13 +8,12 @@
     max-width: 1000px;
     min-height: 100vh;
     margin-inline: auto;
-    overflow: hidden;           /* clip folder icons at edges */
     display: flex;
     flex-direction: column;
     padding-bottom: 0;
 }
 
-/* ── Content area (flex column) ── */
+/* ── Content area ── */
 .hero-content {
     flex: 1;
     display: flex;
@@ -28,26 +21,36 @@
     padding: 0 40px;
 }
 
+/* ── Navbar – centered, no speech-bubble arrow ── */
+.navbar-wrap {
+    display: flex;
+    justify-content: center;       /* ← centered */
+    padding-top: 28px;
+    padding-bottom: 0;
+    position: relative;
+}
+/* Remove the speech-bubble arrow (it pushed the navbar left) */
+.navbar-wrap::after { display: none; }
+
 /* ── Heading ── */
 .hero-heading {
-    margin-top: 48px;
+    margin-top: 44px;
     line-height: .95;
     letter-spacing: -.03em;
-    font-size: clamp(3rem, 8vw, 6.5rem);
-    max-width: 600px;
+    font-size: clamp(3.2rem, 9vw, 7rem);
 }
 .hero-heading .line1 { display: block; font-weight: 800; }
 .hero-heading .line2 { display: block; font-weight: 400; }
 
-/* ── Row: heading left, card right ── */
+/* ── Body row: heading left | card right ── */
 .hero-body {
     display: flex;
     align-items: flex-start;
     gap: 40px;
-    margin-top: 32px;
+    margin-top: 28px;
 }
-.hero-body-left  { flex: 1 1 0; }
-.hero-body-right { flex: 0 0 280px; }
+.hero-body-left  { flex: 1 1 0; min-width: 0; }
+.hero-body-right { flex: 0 0 270px; }
 
 /* ── Info card (home page) ── */
 .info-card {
@@ -61,7 +64,6 @@
     font-size: .95rem;
     font-weight: 500;
     border-bottom: 1px solid #f0f0f0;
-    cursor: default;
 }
 .info-card-row:last-child { border-bottom: none; }
 .info-card-row.highlight  { background: var(--accent); }
@@ -80,29 +82,10 @@
     font-size: .95rem;
 }
 .scan-card-body {
-    padding: 16px 20px;
+    padding: 18px 20px;
     display: flex;
     flex-direction: column;
     gap: 12px;
-}
-
-/* ── Decorative folder icons ── */
-.folder-icon {
-    position: absolute;
-    width: clamp(60px, 8vw, 110px);
-    object-fit: contain;
-    aria-hidden: true;
-}
-.folder-icon.top-right {
-    top: 20px;
-    right: 20px;
-    animation-delay: 0s;
-}
-.folder-icon.mid-left {
-    left: -10px;
-    top: 45%;
-    transform: translateY(-50%);
-    animation-delay: -2.5s;     /* stagger so they don't move in sync */
 }
 
 /* ── Photo stack + folder pocket ── */
@@ -110,41 +93,35 @@
     margin-top: auto;
     position: relative;
     width: 100%;
+    /* enough room for photos (≈240px) + pocket (130px) with overlap */
+    height: 300px;
 }
 
-/* Folder pocket (blue gradient bar behind the photos) */
-.folder-pocket {
-    background: linear-gradient(180deg, var(--folder-top) 0%, var(--folder-bot) 100%);
-    border-radius: 40px 40px 0 0;
-    height: 90px;
-    position: absolute;
-    bottom: 0;
-    left: 0; right: 0;
-    z-index: 1;
-}
-
-/* Photo stack */
+/* Photos: positioned absolute, bottoms at 110px so they poke above the pocket */
 .photo-stack {
+    position: absolute;
+    bottom: 110px;                 /* ride above the pocket */
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
-    justify-content: center;
     align-items: flex-end;
-    gap: -20px;                 /* overlap via negative margins on the items */
-    position: relative;
-    z-index: 2;
-    padding-bottom: 40px;
+    gap: 0;
+    z-index: 2;                    /* BELOW the pocket */
+    width: max-content;
 }
+
 .photo-stack .photo {
-    width: clamp(130px, 18vw, 200px);
+    width: clamp(120px, 16vw, 190px);
     aspect-ratio: 3/4;
     object-fit: cover;
-    border: 6px solid #fff;
+    border: 7px solid #fff;
     border-radius: 4px;
     box-shadow: var(--shadow-md);
     transition: transform .2s;
     flex-shrink: 0;
 }
 .photo-stack .photo:nth-child(1) {
-    transform: rotate(-6deg) translateX(20px);
+    transform: rotate(-7deg) translateX(28px);
     z-index: 1;
 }
 .photo-stack .photo:nth-child(2) {
@@ -152,16 +129,32 @@
     z-index: 3;
 }
 .photo-stack .photo:nth-child(3) {
-    transform: rotate(6deg) translateX(-20px);
+    transform: rotate(7deg) translateX(-28px);
     z-index: 2;
 }
-.photo-stack .photo:hover { transform: rotate(0deg) translateY(-8px) !important; z-index: 10; }
+.photo-stack .photo:hover {
+    transform: rotate(0deg) translateY(-12px) !important;
+    z-index: 10;
+}
+
+/* Folder pocket: ON TOP of photo bases (z-index: 3 > photo-stack z-index: 2) */
+.folder-pocket {
+    background: linear-gradient(180deg, var(--folder-top) 0%, var(--folder-bot) 100%);
+    border-radius: 50px 50px 0 0;
+    height: 130px;
+    position: absolute;
+    bottom: 0;
+    left: 0; right: 0;
+    z-index: 3;                    /* ON TOP of photos */
+}
 
 /* ── Responsive ── */
 @media (max-width: 700px) {
-    .hero-content { padding: 0 16px; }
-    .hero-body { flex-direction: column; gap: 24px; }
-    .hero-body-right { flex: 0 0 auto; width: 100%; }
-    .folder-icon.mid-left { display: none; }
-    .photo-stack .photo { width: clamp(90px, 28vw, 140px); }
+    .hero-content         { padding: 0 16px; }
+    .hero-body            { flex-direction: column; gap: 24px; }
+    .hero-body-right      { flex: 0 0 auto; width: 100%; }
+    .photo-stack .photo   { width: clamp(90px, 26vw, 140px); }
+    .bottom-section       { height: 240px; }
+    .photo-stack          { bottom: 90px; }
+    .folder-pocket        { height: 100px; }
 }

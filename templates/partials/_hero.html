@@ -8,17 +8,9 @@
 {% macro hero(page_name) %}
 <section class="hero">
 
-    <!-- Decorative folder icons -->
-    <img src="{{ url_for('static', filename='images/folder.png') }}"
-         class="folder-icon top-right float-icon"
-         alt="" role="presentation">
-    <img src="{{ url_for('static', filename='images/folder.png') }}"
-         class="folder-icon mid-left float-icon"
-         alt="" role="presentation">
-
     <div class="hero-content">
 
-        <!-- Navbar -->
+        <!-- Navbar (centered) -->
         <div class="navbar-wrap">
             <nav class="navbar" aria-label="Main navigation">
                 <a href="{{ url_for('home') }}"    {% if page_name == 'home' %}class="active"{% endif %}>Home</a>
@@ -50,6 +42,7 @@
 
     <!-- Photo stack + folder pocket -->
     <div class="bottom-section">
+        <!-- Photos sit BELOW the pocket z-index so the pocket overlays their bases -->
         <div class="photo-stack">
             <img src="{{ url_for('static', filename='images/photo1.jpeg') }}"
                  class="photo" alt="Photo 1">
@@ -58,6 +51,7 @@
             <img src="{{ url_for('static', filename='images/photo3.jpeg') }}"
                  class="photo" alt="Photo 3">
         </div>
+        <!-- Pocket sits ON TOP of photo bottoms (higher z-index) -->
         <div class="folder-pocket" aria-hidden="true"></div>
     </div>
 
