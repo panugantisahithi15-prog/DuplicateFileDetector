@@ -1,50 +1,43 @@
 {% extends "base.html" %}
 {% from "partials/_hero.html" import hero %}
 
-{% block title %}Scan a Folder – Duplicate File Manager{% endblock %}
+{% block title %}Scan – Duplicate File Manager{% endblock %}
 
 {% block content %}
 
-{# ── Hero with scan card ── #}
+{# ── Hero with bare scan form (no card, just label + input + button) ── #}
 {% call hero("service") %}
-    <div class="scan-card">
-        <div class="scan-card-header">📂 Scan a folder</div>
-        <div class="scan-card-body">
-            <form method="POST" id="scan-form" novalidate>
-                {{ form.hidden_tag() }}
+    <form method="POST" id="scan-form" class="scan-form-bare" novalidate>
+        {{ form.hidden_tag() }}
 
-                <div>
-                    <label for="folder" style="font-size:.82rem;font-weight:600;margin-bottom:6px;display:block;">
-                        Folder path
-                    </label>
-                    {{ form.folder(
-                        id="folder",
-                        class="input-field",
-                        placeholder="C:\\Users\\You\\Pictures",
-                        autocomplete="off",
-                        value=form.folder.data or ""
-                    ) }}
-                    {% if form.folder.errors %}
-                        {% for err in form.folder.errors %}
-                        <p style="color:var(--error-text);font-size:.78rem;margin-top:4px;">{{ err }}</p>
-                        {% endfor %}
-                    {% endif %}
-                </div>
+        <p class="path-label">Folder path :</p>
 
-                <button type="submit" class="btn btn-primary" id="scan-btn">
-                    <span class="spinner" aria-hidden="true"></span>
-                    <span class="btn-text">🔍 Scan</span>
-                </button>
-            </form>
-        </div>
-    </div>
+        {{ form.folder(
+            id="folder",
+            class="path-input",
+            placeholder="e.g. C:\\Users\\You\\Pictures",
+            autocomplete="off",
+            value=form.folder.data or ""
+        ) }}
+
+        {% if form.folder.errors %}
+            {% for err in form.folder.errors %}
+            <p style="font-size:.8rem;color:var(--error-text);margin-top:-6px;">{{ err }}</p>
+            {% endfor %}
+        {% endif %}
+
+        <button type="submit" class="scan-btn" id="scan-btn">
+            <span class="spinner" aria-hidden="true"></span>
+            <span class="btn-text">Scan</span>
+        </button>
+    </form>
 {% endcall %}
 
-{# ── Results section (appears after a successful POST) ── #}
+{# ── Results section (appears after a successful scan) ── #}
 {% if result is not none %}
 <div class="results-section" id="results-section">
 
-    {# ── Error state ── #}
+    {# ── Error ── #}
     {% if result.error %}
     <div class="state-msg">
         <div class="emoji">❌</div>
@@ -73,17 +66,18 @@
         </div>
     </div>
 
-    {# ── Empty state ── #}
+    {# ── Empty ── #}
     {% if result.groups | length == 0 %}
     <div class="state-msg">
         <div class="emoji">✅</div>
         <p><strong>No duplicate files found.</strong></p>
-        <p style="margin-top:8px;font-size:.9rem;color:var(--text-dim);">Your folder is clean.</p>
+        <p style="margin-top:6px;color:var(--text-dim);font-size:.9rem;">Your folder is clean.</p>
     </div>
 
     {# ── Groups ── #}
     {% else %}
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;
+                margin-bottom:20px;flex-wrap:wrap;gap:12px;">
         <h2 style="font-size:1.2rem;font-weight:800;letter-spacing:-.02em;">
             {{ result.group_count }} duplicate group{{ 's' if result.group_count != 1 }}
         </h2>
@@ -101,8 +95,7 @@
             <div class="group-card-header">
                 <span class="group-num">Group #{{ loop.index }}</span>
                 <span class="group-meta">
-                    {{ group.count }} copies &middot;
-                    {{ group.files[0].size_human }} each
+                    {{ group.count }} copies &middot; {{ group.files[0].size_human }} each
                 </span>
                 <span class="wasted-badge">{{ group.wasted_human }} wasted</span>
                 {% if scan_id %}
@@ -110,18 +103,17 @@
                    class="btn btn-primary manage-btn">Manage →</a>
                 {% endif %}
             </div>
-
             <ul class="file-list">
                 {% for f in group.files %}
                 <li class="file-row">
                     <span class="file-icon" aria-hidden="true">
                         {%- set ext = f.name.rsplit('.', 1)[-1].lower() if '.' in f.name else '' -%}
-                        {%- if ext in ('jpg','jpeg','png','gif','webp','bmp','svg','heic') -%}🖼️
-                        {%- elif ext in ('mp4','mov','avi','mkv','wmv','flv') -%}🎬
-                        {%- elif ext in ('mp3','wav','flac','aac','ogg','m4a') -%}🎵
+                        {%- if ext in ('jpg','jpeg','png','gif','webp','bmp','heic') -%}🖼️
+                        {%- elif ext in ('mp4','mov','avi','mkv','wmv') -%}🎬
+                        {%- elif ext in ('mp3','wav','flac','aac','m4a') -%}🎵
                         {%- elif ext in ('pdf',) -%}📕
                         {%- elif ext in ('zip','rar','7z','tar','gz') -%}📦
-                        {%- elif ext in ('py','js','ts','html','css','java','cpp','c') -%}💻
+                        {%- elif ext in ('py','js','ts','html','css','java') -%}💻
                         {%- else -%}📄{%- endif -%}
                     </span>
                     <div class="file-paths">
@@ -136,19 +128,20 @@
         {% endfor %}
     </div>
     {% endif %}
-
     {% endif %}{# /result.error #}
 
-    {# ── Skipped files (collapsible) ── #}
+    {# ── Skipped files ── #}
     {% if result.skipped %}
     <details style="margin-top:24px;">
-        <summary style="cursor:pointer;font-size:.85rem;color:var(--text-dim);font-weight:600;user-select:none;">
-            ⚠️ {{ result.skipped | length }} file{{ 's' if result.skipped | length != 1 }}
+        <summary style="cursor:pointer;font-size:.85rem;color:var(--text-dim);
+                        font-weight:600;user-select:none;">
+            ⚠️ {{ result.skipped|length }} file{{ 's' if result.skipped|length != 1 }}
             could not be read — click to expand
         </summary>
         <ul style="margin-top:10px;list-style:none;padding-left:4px;">
             {% for sk in result.skipped %}
-            <li style="font-size:.78rem;color:var(--text-dim);padding:3px 0;font-family:var(--mono);">
+            <li style="font-size:.78rem;color:var(--text-dim);padding:3px 0;
+                       font-family:var(--mono);">
                 <strong style="color:var(--text);">{{ sk.path }}</strong>
                 &mdash; {{ sk.reason }}
             </li>
@@ -157,7 +150,7 @@
     </details>
     {% endif %}
 
-</div><!-- /results-section -->
+</div>{# /results-section #}
 {% endif %}
 
 {% endblock %}

@@ -1,160 +1,233 @@
 /* ============================================================
-   hero.css  –  Hero layout
+   hero.css  –  pixel-faithful Canva layout
+   Layout (top → bottom):
+     1. navbar-wrap  (centered pill + speech-bubble tail)
+     2. heading-area (full-width giant text + cursor icon)
+     3. hero-sub     (info card right / scan form left)
+     4. bottom-section (tilted photos + blue folder pocket)
    ============================================================ */
 
-/* ── Hero wrapper ── */
+/* ── 0. Hero shell ── */
 .hero {
     position: relative;
-    max-width: 1000px;
+    max-width: 960px;
     min-height: 100vh;
     margin-inline: auto;
     display: flex;
     flex-direction: column;
-    padding-bottom: 0;
+    overflow: hidden;
 }
 
-/* ── Content area ── */
-.hero-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    padding: 0 40px;
-}
-
-/* ── Navbar – centered, no speech-bubble arrow ── */
+/* ── 1. Navbar ── */
 .navbar-wrap {
     display: flex;
-    justify-content: center;       /* ← centered */
-    padding-top: 28px;
-    padding-bottom: 0;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 32px;
+}
+
+/* speech-bubble tail – white downward triangle */
+.speech-tail {
+    width: 0; height: 0;
+    border-left:  16px solid transparent;
+    border-right: 16px solid transparent;
+    border-top:   16px solid #ffffff;
+    /* match navbar shadow */
+    filter: drop-shadow(0 4px 3px rgba(0,0,0,.08));
+}
+
+/* The last nav item (►) */
+.nav-arrow {
+    padding: 6px 16px;
+    font-size: .85rem;
+    font-weight: 700;
+    border-left: 1px solid #e0e0e0;
+    cursor: default;
+    color: var(--text);
+}
+
+/* ── 2. Giant heading ── */
+.heading-area {
+    padding: 0 24px;
+    margin-top: 36px;
     position: relative;
 }
-/* Remove the speech-bubble arrow (it pushed the navbar left) */
-.navbar-wrap::after { display: none; }
 
-/* ── Heading ── */
 .hero-heading {
-    margin-top: 44px;
-    line-height: .95;
+    line-height: .92;
     letter-spacing: -.03em;
-    font-size: clamp(3.2rem, 9vw, 7rem);
+    /* scales: 4rem on phones → fills ~960px container at desktop */
+    font-size: clamp(4rem, 12.5vw, 8.5rem);
+    color: #111;
 }
 .hero-heading .line1 { display: block; font-weight: 800; }
-.hero-heading .line2 { display: block; font-weight: 400; }
+.hero-heading .line2 { display: block; font-weight: 700; }
 
-/* ── Body row: heading left | card right ── */
-.hero-body {
-    display: flex;
-    align-items: flex-start;
-    gap: 40px;
-    margin-top: 28px;
+/* pixel cursor decoration – positioned after the second heading line */
+.cursor-icon {
+    display: inline-block;
+    margin-left: 8px;
+    vertical-align: top;
+    margin-top: 8px;
+    /* sits on a new line visually via the wrapper */
+    position: absolute;
+    /* approximate the same position as the Canva reference */
+    bottom: -8px;
+    left: calc(24px + 18em * .55);   /* ≈ width of "THE FOLDER" at current size */
 }
-.hero-body-left  { flex: 1 1 0; min-width: 0; }
-.hero-body-right { flex: 0 0 270px; }
 
-/* ── Info card (home page) ── */
+/* ── 3. Sub-content slot ── */
+.hero-sub {
+    padding: 0 24px;
+    margin-top: 32px;
+    flex-shrink: 0;
+}
+
+/* Home page: info card floats to the right */
+.hero-sub--right {
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Service page: form stays left */
+.hero-sub--left {
+    display: flex;
+    justify-content: flex-start;
+}
+
+/* ── Info card (home) ── */
 .info-card {
-    background: var(--card-bg);
-    border-radius: var(--radius-card);
-    box-shadow: var(--shadow-md);
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 4px 24px rgba(0,0,0,.12);
     overflow: hidden;
+    min-width: 260px;
+    max-width: 340px;
+    width: 100%;
 }
 .info-card-row {
-    padding: 14px 20px;
+    padding: 16px 22px;
     font-size: .95rem;
     font-weight: 500;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid #eee;
 }
-.info-card-row:last-child { border-bottom: none; }
-.info-card-row.highlight  { background: var(--accent); }
+.info-card-row:last-child  { border-bottom: none; }
+.info-card-row.highlight   { background: var(--accent); }
 
-/* ── Scan card (service page) ── */
-.scan-card {
-    background: var(--card-bg);
-    border-radius: var(--radius-card);
-    box-shadow: var(--shadow-md);
-    overflow: hidden;
-}
-.scan-card-header {
-    background: var(--accent);
-    padding: 14px 20px;
-    font-weight: 700;
-    font-size: .95rem;
-}
-.scan-card-body {
-    padding: 18px 20px;
+/* ── Scan form (service) ── */
+.scan-form-bare {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
+    max-width: 480px;
+    width: 100%;
 }
+.scan-form-bare .path-label {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #111;
+    margin-bottom: 2px;
+}
+.scan-form-bare .path-input {
+    width: 100%;
+    padding: 12px 20px;
+    border-radius: 50px;
+    border: none;
+    background: #e4e4e4;
+    font-family: var(--font);
+    font-size: .95rem;
+    color: #111;
+    outline: none;
+    transition: background .15s;
+}
+.scan-form-bare .path-input:focus { background: #fff; }
 
-/* ── Photo stack + folder pocket ── */
+.scan-form-bare .scan-btn {
+    align-self: center;
+    padding: 8px 32px;
+    border-radius: 50px;
+    border: 1.5px solid var(--accent-dark);
+    background: var(--accent);
+    font-family: var(--font);
+    font-size: .9rem;
+    font-weight: 600;
+    color: #111;
+    cursor: pointer;
+    transition: background .15s, transform .15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.scan-form-bare .scan-btn:hover { background: var(--accent-dark); color: #fff; transform: translateY(-1px); }
+.scan-form-bare .scan-btn:disabled { opacity: .6; cursor: not-allowed; }
+
+/* spinner inside the scan button */
+.scan-btn .spinner {
+    width: 14px; height: 14px;
+    border: 2px solid rgba(0,0,0,.2);
+    border-top-color: #333;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    display: none;
+}
+.scan-btn.loading .spinner  { display: inline-block; }
+.scan-btn.loading .btn-text { display: none; }
+
+/* ── 4. Bottom section ── */
 .bottom-section {
     margin-top: auto;
     position: relative;
     width: 100%;
-    /* enough room for photos (≈240px) + pocket (130px) with overlap */
-    height: 300px;
+    /* total height: photos poke out above the pocket */
+    height: 340px;
+    flex-shrink: 0;
 }
 
-/* Photos: positioned absolute, bottoms at 110px so they poke above the pocket */
+/* Photos – sit BELOW z-index of pocket so pocket clips their bases */
 .photo-stack {
     position: absolute;
-    bottom: 110px;                 /* ride above the pocket */
+    bottom: 100px;          /* float above the pocket top */
     left: 50%;
     transform: translateX(-50%);
     display: flex;
     align-items: flex-end;
-    gap: 0;
-    z-index: 2;                    /* BELOW the pocket */
+    z-index: 2;
     width: max-content;
 }
-
 .photo-stack .photo {
-    width: clamp(120px, 16vw, 190px);
+    width: clamp(130px, 18vw, 210px);
     aspect-ratio: 3/4;
     object-fit: cover;
     border: 7px solid #fff;
-    border-radius: 4px;
-    box-shadow: var(--shadow-md);
-    transition: transform .2s;
+    border-radius: 3px;
+    box-shadow: 0 6px 24px rgba(0,0,0,.2);
     flex-shrink: 0;
+    transition: transform .2s;
 }
-.photo-stack .photo:nth-child(1) {
-    transform: rotate(-7deg) translateX(28px);
-    z-index: 1;
-}
-.photo-stack .photo:nth-child(2) {
-    transform: rotate(0deg);
-    z-index: 3;
-}
-.photo-stack .photo:nth-child(3) {
-    transform: rotate(7deg) translateX(-28px);
-    z-index: 2;
-}
-.photo-stack .photo:hover {
-    transform: rotate(0deg) translateY(-12px) !important;
-    z-index: 10;
-}
+.photo-stack .photo:nth-child(1) { transform: rotate(-7deg) translateX(28px);  z-index: 1; }
+.photo-stack .photo:nth-child(2) { transform: rotate(0deg);                     z-index: 3; }
+.photo-stack .photo:nth-child(3) { transform: rotate(7deg)  translateX(-28px); z-index: 2; }
+.photo-stack .photo:hover { transform: rotate(0deg) translateY(-14px) !important; z-index: 10; }
 
-/* Folder pocket: ON TOP of photo bases (z-index: 3 > photo-stack z-index: 2) */
+/* Blue folder pocket – ON TOP of photo bases */
 .folder-pocket {
-    background: linear-gradient(180deg, var(--folder-top) 0%, var(--folder-bot) 100%);
-    border-radius: 50px 50px 0 0;
-    height: 130px;
     position: absolute;
     bottom: 0;
     left: 0; right: 0;
-    z-index: 3;                    /* ON TOP of photos */
+    height: 120px;
+    background: linear-gradient(180deg, #a9d3f5 0%, #6d9fd4 100%);
+    border-radius: 50px 50px 0 0;
+    z-index: 3;            /* higher than photo-stack z-index:2 */
 }
 
 /* ── Responsive ── */
-@media (max-width: 700px) {
-    .hero-content         { padding: 0 16px; }
-    .hero-body            { flex-direction: column; gap: 24px; }
-    .hero-body-right      { flex: 0 0 auto; width: 100%; }
-    .photo-stack .photo   { width: clamp(90px, 26vw, 140px); }
-    .bottom-section       { height: 240px; }
-    .photo-stack          { bottom: 90px; }
-    .folder-pocket        { height: 100px; }
+@media (max-width: 640px) {
+    .heading-area     { padding: 0 16px; }
+    .hero-sub         { padding: 0 16px; }
+    .hero-heading     { font-size: clamp(3rem, 12vw, 5rem); }
+    .bottom-section   { height: 260px; }
+    .photo-stack      { bottom: 80px; }
+    .folder-pocket    { height: 90px; }
+    .photo-stack .photo { width: clamp(100px, 27vw, 150px); }
+    .cursor-icon      { display: none; }
 }
