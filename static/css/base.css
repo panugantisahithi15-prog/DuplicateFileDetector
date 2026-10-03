@@ -37,6 +37,7 @@ body {
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
+    overflow-x: hidden;         /* point 9: no horizontal scroll */
     -webkit-font-smoothing: antialiased;
 }
 
@@ -46,23 +47,26 @@ a   { color: inherit; text-decoration: none; }
 /* ── Navbar pill ── */
 .navbar {
     display: flex;
-    align-items: center;
+    align-items: stretch;
     gap: 0;
     background: var(--card-bg);
     border-radius: var(--radius-pill);
     box-shadow: var(--shadow-sm);
-    padding: 10px 6px;
+    overflow: hidden;          /* clips child bg to the pill shape */
+    padding: 0;
     width: fit-content;
 }
 
 .navbar a {
-    font-weight: 600;
+    font-weight: 500;
     font-size: .9rem;
-    padding: 6px 22px;
-    border-radius: var(--radius-pill);
+    padding: 12px 32px;
+    border-radius: 0;          /* flat – pill shape comes from container */
     color: var(--text);
     transition: background .15s, color .15s;
     white-space: nowrap;
+    display: flex;
+    align-items: center;
 }
 
 .navbar a + a          { border-left: 1px solid #e0e0e0; }
@@ -151,6 +155,6 @@ a   { color: inherit; text-decoration: none; }
 .btn.loading .btn-text { display: none; }
 
 /* ── Responsive ── */
-@media (max-width: 700px) {
-    .navbar a { padding: 6px 12px; font-size: .82rem; }
+@media (max-width: 768px) {
+    .navbar a { padding: 6px 10px; font-size: .78rem; }
 }

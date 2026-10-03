@@ -1,19 +1,29 @@
 {% extends "base.html" %}
+{% from "partials/_hero.html" import hero %}
 
 {% block title %}Manage Duplicates – Duplicate File Manager{% endblock %}
 
 {% block content %}
+{% call hero("action") %}
+    <!-- Info card – left side -->
+    <div class="info-card">
+        <div class="info-card-row"><span class="highlight-badge">Safe management</span></div>
+        <div class="info-card-row">Files go to Recycle Bin</div>
+        <div class="info-card-row">Keep at least one copy</div>
+    </div>
+{% endcall %}
+
+<!-- ── Action content (scrolls below hero) ── -->
 <div class="action-layout">
 
-    <!-- Minimal navbar for non-hero pages -->
-    <div class="navbar-wrap" style="margin-bottom:32px;">
-        <nav class="navbar" aria-label="Main navigation">
-            <a href="{{ url_for('home') }}">Home</a>
-            <a href="{{ url_for('service') }}">Service</a>
-            <a href="{{ url_for('action') }}" class="active">Action</a>
-            <a href="{{ url_for('about') }}">About</a>
-        </nav>
+    {% if result and result.upload_mode %}
+    <div class="upload-notice" style="margin-bottom:28px;">
+        📤 <strong>File upload mode</strong> — this scan was performed from uploaded files.
+        Relative paths are shown, but the app cannot reach the originals on disk, so
+        <strong>Trash</strong> and <strong>Rename</strong> are disabled.
+        Re-scan using <em>Type Path</em> on the Service page to enable full management.
     </div>
+    {% endif %}
 
     {% if not result %}
     <!-- No scan result: prompt user to scan first -->
@@ -112,6 +122,19 @@
 
                 <!-- Action buttons -->
                 <div class="actions">
+                    {% if result.upload_mode %}
+                    <!-- Upload mode: disable both actions -->
+                    <span class="btn btn-ghost"
+                          style="padding:6px 14px;font-size:.82rem;opacity:.35;cursor:not-allowed;"
+                          title="Re-scan with Type Path to enable rename.">
+                        ✏️ Rename
+                    </span>
+                    <span class="btn btn-danger"
+                          style="padding:6px 14px;font-size:.82rem;opacity:.35;cursor:not-allowed;"
+                          title="Re-scan with Type Path to enable trash.">
+                        🗑️ Trash
+                    </span>
+                    {% else %}
                     <!-- Rename toggle -->
                     <button class="btn btn-ghost rename-toggle"
                             style="padding:6px 14px;font-size:.82rem;"
@@ -140,6 +163,7 @@
                         🗑️ Trash
                     </span>
                     {% endif %}
+                    {% endif %}{# /upload_mode #}
                 </div>
 
             </li>

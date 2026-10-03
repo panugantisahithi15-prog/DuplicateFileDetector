@@ -1,136 +1,149 @@
 /* ============================================================
-   hero.css  –  pixel-faithful Canva layout
-   Layout (top → bottom):
-     1. navbar-wrap  (centered pill + speech-bubble tail)
-     2. heading-area (full-width giant text + cursor icon)
-     3. hero-sub     (info card right / scan form left)
-     4. bottom-section (tilted photos + blue folder pocket)
+   hero.css  –  Responsive hero layout
+   Spacing system:
+     small=10px  medium=20px  large=40px  section=60px
+   Breakpoints:
+     Desktop  > 1024px  (default styles)
+     Tablet   769px – 1024px
+     Mobile   ≤ 768px
    ============================================================ */
 
-/* ── 0. Hero shell ── */
+/* ── 0. Hero shell ──────────────────────────────────────────
+   Point 1: max-width 1140px, centered.
+   Point 9: overflow hidden prevents any scroll bleed.        */
 .hero {
-    position: relative;
-    max-width: 960px;
-    min-height: 100vh;
+    max-width: 1140px;
+    height: 100dvh;
     margin-inline: auto;
+    padding: 0 20px;            /* horizontal gutter */
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    box-sizing: border-box;
 }
 
-/* ── 1. Navbar ── */
+/* ── 1. Navbar ─────────────────────────────────────────────*/
 .navbar-wrap {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 32px;
+    padding-top: 40px;          /* large */
+    flex-shrink: 0;
 }
 
-/* speech-bubble tail – white downward triangle */
 .speech-tail {
     width: 0; height: 0;
-    border-left:  16px solid transparent;
-    border-right: 16px solid transparent;
-    border-top:   16px solid #ffffff;
-    /* match navbar shadow */
-    filter: drop-shadow(0 4px 3px rgba(0,0,0,.08));
+    border-left:  13px solid transparent;
+    border-right: 13px solid transparent;
+    border-top:   13px solid #ffffff;
+    filter: drop-shadow(0 4px 4px rgba(0,0,0,.10));
 }
 
-/* The last nav item (►) */
 .nav-arrow {
-    padding: 6px 16px;
+    padding: 12px 18px;
     font-size: .85rem;
     font-weight: 700;
     border-left: 1px solid #e0e0e0;
     cursor: default;
     color: var(--text);
+    display: flex;
+    align-items: center;
 }
 
-/* ── 2. Giant heading ── */
+/* ── 2. Heading ─────────────────────────────────────────────
+   Point 3: clamp() scales smoothly — no fixed huge size.    */
 .heading-area {
-    padding: 0 24px;
-    margin-top: 36px;
+    padding: 0;
+    margin-top: 40px;           /* large */
     position: relative;
+    flex-shrink: 0;
+    max-width: 800px;
+    z-index: 10;
 }
 
 .hero-heading {
-    line-height: .92;
+    line-height: .90;
     letter-spacing: -.03em;
-    /* scales: 4rem on phones → fills ~960px container at desktop */
-    font-size: clamp(4rem, 12.5vw, 8.5rem);
+    font-size: clamp(1.8rem, 5vw, 4.8rem);   /* responsive, not fixed */
     color: #111;
 }
 .hero-heading .line1 { display: block; font-weight: 800; }
-.hero-heading .line2 { display: block; font-weight: 700; }
+.hero-heading .line2 { display: block; font-weight: 800; }
 
-/* pixel cursor decoration – positioned after the second heading line */
 .cursor-icon {
-    display: inline-block;
-    margin-left: 8px;
-    vertical-align: top;
-    margin-top: 8px;
-    /* sits on a new line visually via the wrapper */
     position: absolute;
-    /* approximate the same position as the Canva reference */
-    bottom: -8px;
-    left: calc(24px + 18em * .55);   /* ≈ width of "THE FOLDER" at current size */
+    bottom: -14px;
+    left: 42%;
+    display: inline-block;
 }
 
-/* ── 3. Sub-content slot ── */
+/* ── 3. Sub-content slot ────────────────────────────────────*/
 .hero-sub {
-    padding: 0 24px;
-    margin-top: 32px;
+    padding: 0;
+    margin-top: 20px;           /* medium */
     flex-shrink: 0;
-}
-
-/* Home page: info card floats to the right */
-.hero-sub--right {
-    display: flex;
-    justify-content: flex-end;
-}
-
-/* Service page: form stays left */
-.hero-sub--left {
-    display: flex;
+    position: relative;
+    z-index: 10;
+    width: 100%;                /* ensures centering modifiers span full width */
+    display: flex;              /* always flex so modifiers just override justify-content */
     justify-content: flex-start;
 }
 
-/* ── Info card (home) ── */
+.hero-sub--right  { justify-content: flex-end; }
+.hero-sub--left   { justify-content: flex-start; }
+.hero-sub--center { justify-content: center; }
+
+/* ── Info card ──────────────────────────────────────────────*/
 .info-card {
     background: #fff;
     border-radius: 20px;
-    box-shadow: 0 4px 24px rgba(0,0,0,.12);
+    box-shadow: 0 6px 28px rgba(0,0,0,.13);
     overflow: hidden;
-    min-width: 260px;
-    max-width: 340px;
+    min-width: 240px;
+    max-width: 320px;
     width: 100%;
 }
-.info-card-row {
-    padding: 16px 22px;
-    font-size: .95rem;
-    font-weight: 500;
-    border-bottom: 1px solid #eee;
-}
-.info-card-row:last-child  { border-bottom: none; }
-.info-card-row.highlight   { background: var(--accent); }
 
-/* ── Scan form (service) ── */
+.info-card-row {
+    padding: 12px 20px;
+    font-size: .9rem;
+    font-weight: 500;
+    border-bottom: 1px solid #ebebeb;
+    color: #222;
+    line-height: 1.5;
+}
+.info-card-row:last-child { border-bottom: none; }
+
+.highlight-badge {
+    display: inline-block;
+    background: var(--accent);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+/* ── Scan form (service page) ───────────────────────────────*/
 .scan-form-bare {
     display: flex;
     flex-direction: column;
+    align-items: center;        /* center label, input, button within form */
     gap: 10px;
     max-width: 480px;
     width: 100%;
+    margin: 0 auto;             /* fallback centering in case parent lacks width */
 }
 .scan-form-bare .path-label {
     font-size: 1rem;
     font-weight: 500;
     color: #111;
-    margin-bottom: 2px;
+    margin-bottom: 4px;
+    align-self: stretch;
+    text-align: left;
 }
 .scan-form-bare .path-input {
     width: 100%;
-    padding: 12px 20px;
+    align-self: stretch;
+    padding: 10px 20px;
     border-radius: 50px;
     border: none;
     background: #e4e4e4;
@@ -144,7 +157,8 @@
 
 .scan-form-bare .scan-btn {
     align-self: center;
-    padding: 8px 32px;
+    margin-top: 10px;
+    padding: 10px 20px;
     border-radius: 50px;
     border: 1.5px solid var(--accent-dark);
     background: var(--accent);
@@ -156,12 +170,11 @@
     transition: background .15s, transform .15s;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 10px;
 }
-.scan-form-bare .scan-btn:hover { background: var(--accent-dark); color: #fff; transform: translateY(-1px); }
+.scan-form-bare .scan-btn:hover    { background: var(--accent-dark); color: #fff; transform: translateY(-1px); }
 .scan-form-bare .scan-btn:disabled { opacity: .6; cursor: not-allowed; }
 
-/* spinner inside the scan button */
 .scan-btn .spinner {
     width: 14px; height: 14px;
     border: 2px solid rgba(0,0,0,.2);
@@ -173,61 +186,200 @@
 .scan-btn.loading .spinner  { display: inline-block; }
 .scan-btn.loading .btn-text { display: none; }
 
-/* ── 4. Bottom section ── */
-.bottom-section {
-    margin-top: auto;
-    position: relative;
-    width: 100%;
-    /* total height: photos poke out above the pocket */
-    height: 340px;
-    flex-shrink: 0;
+/* ── Browse-mode elements ───────────────────────────────────*/
+
+.mode-link {
+    background: none;
+    border: none;
+    font-family: var(--font);
+    font-size: .8rem;
+    color: var(--text-dim);
+    cursor: pointer;
+    padding: 4px 0;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color .15s;
+    align-self: center;
+}
+.mode-link:hover { color: var(--text); }
+
+.folder-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.folder-name-text {
+    font-family: var(--mono);
+    font-size: .88rem;
+    font-weight: 600;
+    color: var(--text);
+    max-width: 260px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.file-count-badge {
+    background: var(--accent);
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: .75rem;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
 }
 
-/* Photos – sit BELOW z-index of pocket so pocket clips their bases */
+/* ── 4. Bottom section ──────────────────────────────────────
+   Point 5: flex column, centered.
+   Point 6: pocket uses negative margin-top for overlap.     */
+.bottom-section {
+    flex: 1;
+    min-height: 200px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 20px;          /* medium – card → images */
+    overflow: hidden;
+}
+
+/* ── Photos ─────────────────────────────────────────────────
+   Point 4: width is % via vw + max-width cap (not fixed px). */
 .photo-stack {
-    position: absolute;
-    bottom: 100px;          /* float above the pocket top */
-    left: 50%;
-    transform: translateX(-50%);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;                 /* base layer – pocket sits on top */
     display: flex;
     align-items: flex-end;
-    z-index: 2;
     width: max-content;
 }
+
 .photo-stack .photo {
-    width: clamp(130px, 18vw, 210px);
+    width: clamp(100px, 12vw, 200px);   /* scales with viewport */
     aspect-ratio: 3/4;
     object-fit: cover;
-    border: 7px solid #fff;
+    border: 6px solid #fff;
     border-radius: 3px;
-    box-shadow: 0 6px 24px rgba(0,0,0,.2);
+    box-shadow: 0 6px 24px rgba(0,0,0,.20);
     flex-shrink: 0;
-    transition: transform .2s;
+    transition: transform .25s;
 }
-.photo-stack .photo:nth-child(1) { transform: rotate(-7deg) translateX(28px);  z-index: 1; }
-.photo-stack .photo:nth-child(2) { transform: rotate(0deg);                     z-index: 3; }
-.photo-stack .photo:nth-child(3) { transform: rotate(7deg)  translateX(-28px); z-index: 2; }
-.photo-stack .photo:hover { transform: rotate(0deg) translateY(-14px) !important; z-index: 10; }
 
-/* Blue folder pocket – ON TOP of photo bases */
+.photo-stack .photo:nth-child(1) {
+    transform: rotate(-10deg);
+    z-index: 1;
+    margin-right: -50px;
+}
+.photo-stack .photo:nth-child(2) {
+    transform: rotate(0deg);
+    z-index: 3;
+}
+.photo-stack .photo:nth-child(3) {
+    transform: rotate(10deg);
+    z-index: 2;
+    margin-left: -50px;
+}
+.photo-stack .photo:hover {
+    transform: rotate(0deg) translateY(-14px) !important;
+    z-index: 10;
+}
+
+/* ── Blue pocket ─────────────────────────────────────────────
+   Point 6: overlaps photos by 100px, width 75%, centered.
+   z-index 3 puts it ON TOP of photos (z-index 1).           */
 .folder-pocket {
-    position: absolute;
-    bottom: 0;
-    left: 0; right: 0;
-    height: 120px;
-    background: linear-gradient(180deg, #a9d3f5 0%, #6d9fd4 100%);
-    border-radius: 50px 50px 0 0;
-    z-index: 3;            /* higher than photo-stack z-index:2 */
+    flex: 1 0 140px;
+    width: 75%;
+    margin-top: -100px;
+    background: linear-gradient(180deg, #b8daf5 0%, #7ab0e0 100%);
+    border-radius: 28px 28px 0 0;
+    z-index: 3;
+    position: relative;
+    box-shadow: 0 -12px 40px rgba(100, 160, 215, 0.35);
 }
 
-/* ── Responsive ── */
-@media (max-width: 640px) {
-    .heading-area     { padding: 0 16px; }
-    .hero-sub         { padding: 0 16px; }
-    .hero-heading     { font-size: clamp(3rem, 12vw, 5rem); }
-    .bottom-section   { height: 260px; }
-    .photo-stack      { bottom: 80px; }
-    .folder-pocket    { height: 90px; }
-    .photo-stack .photo { width: clamp(100px, 27vw, 150px); }
-    .cursor-icon      { display: none; }
+/* ── Service page: fix pocket to match Home ─────────────────
+   .hero-sub--center is only set on the service page (see macro).
+   Using it as a sibling anchor avoids any HTML change and keeps
+   this rule from affecting Home, Action, or About.              */
+.hero-sub--center ~ .bottom-section {
+    justify-content: flex-end;
+}
+.hero-sub--center ~ .bottom-section .folder-pocket {
+    flex: 0 0 140px;
+}
+
+/* ── Tablet: 769px – 1024px ─────────────────────────────────
+   Point 7: reduce image + heading size, tighten spacing.    */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .hero               { padding: 0 16px; }
+    .navbar-wrap        { padding-top: 30px; }
+    .heading-area       { margin-top: 30px; }
+    .hero-sub           { margin-top: 20px; }
+    .hero-heading       { font-size: clamp(1.8rem, 4.5vw, 3.6rem); }
+    .bottom-section     { padding-top: 20px; }
+    .photo-stack .photo { width: clamp(90px, 10vw, 160px); border-width: 5px; }
+    .photo-stack .photo:nth-child(1) { margin-right: -40px; }
+    .photo-stack .photo:nth-child(3) { margin-left:  -40px; }
+    .folder-pocket      { width: 80%; margin-top: -80px; }
+}
+
+/* ── Mobile: ≤ 768px ────────────────────────────────────────
+   Covers all phones and small tablets in portrait.
+   Key fixes:
+     • Heading scales down via clamp so it doesn't eat space.
+     • Info card is capped and centred — not stretched to full width.
+     • bottom-section uses justify-content:flex-end so photos + pocket
+       anchor to the bottom of the viewport instead of floating mid-screen.
+     • Pocket is a fixed-height footer strip (no longer flex:1 fill).
+     • Photos peek clearly above the pocket with a smaller overlap.    */
+@media (max-width: 768px) {
+    /* ── Shell ── */
+    .hero               { padding: 0 16px; }
+    .navbar-wrap        { padding-top: 18px; }
+    .heading-area       { margin-top: 14px; }
+    .hero-sub           { margin-top: 10px; }
+
+    /* ── Navbar: tighter so it fits narrow screens ── */
+    .navbar a           { padding: 7px 12px; font-size: .78rem; }
+
+    /* ── Heading: scale down so it doesn't dominate the viewport ── */
+    .hero-heading       { font-size: clamp(1.3rem, 7vw, 2rem); line-height: .91; }
+
+    /* ── Info card: centred + capped width ── */
+    .hero-sub--right,
+    .hero-sub--left     { justify-content: center; }
+    .info-card          { max-width: 270px; min-width: unset; width: 100%; }
+    .info-card-row      { padding: 8px 14px; font-size: .82rem; }
+
+    /* ── Scan form (service page) ── */
+    .scan-form-bare     { max-width: 100%; }
+    .scan-form-bare .path-input { padding: 9px 16px; font-size: .9rem; }
+
+    /* ── Bottom section: push photos + pocket to the bottom ── */
+    .bottom-section     {
+        padding-top: 0;
+        min-height: 0;
+        justify-content: flex-end;   /* anchor content to bottom of hero */
+    }
+
+    /* ── Photos: slightly smaller so they sit comfortably above the pocket ── */
+    .photo-stack        { margin-bottom: 0; }
+    .photo-stack .photo { width: clamp(70px, 18vw, 100px); border-width: 3px; }
+    .photo-stack .photo:nth-child(1) { transform: rotate(-8deg); margin-right: -26px; }
+    .photo-stack .photo:nth-child(3) { transform: rotate(8deg);  margin-left:  -26px; }
+
+    /* ── Pocket: fixed-height footer strip instead of filling the screen ──
+       flex: 0 0 90px  → exactly 90 px, no grow, no shrink.
+       margin-top: -36px → overlaps only the bottom 36 px of the photos,
+       leaving 70 %+ of each photo clearly visible above.               */
+    .folder-pocket      {
+        flex: 0 0 90px;
+        width: 92%;
+        margin-top: -36px;
+        border-radius: 18px 18px 0 0;
+    }
+
+    .cursor-icon        { display: none; }
 }

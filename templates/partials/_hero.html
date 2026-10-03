@@ -23,8 +23,16 @@
     <!-- ② Full-width giant heading -->
     <div class="heading-area">
         <h1 class="hero-heading">
+            {% if page_name == 'action' %}
+            <span class="line1">MANAGE YOUR</span>
+            <span class="line2">DUPLICATES</span>
+            {% elif page_name == 'about' %}
+            <span class="line1">HOW IT ALL</span>
+            <span class="line2">WORKS</span>
+            {% else %}
             <span class="line1">WHAT'S INSIDE</span>
-            <span class="line2">THE FOLDER</span>
+            <span class="line2">THIS FOLDER</span>
+            {% endif %}
         </h1>
         <!-- decorative pixel cursor -->
         <div class="cursor-icon" aria-hidden="true">
@@ -37,7 +45,7 @@
     </div>
 
     <!-- ③ Sub-content slot (info card for home, form for service) -->
-    <div class="hero-sub {{ 'hero-sub--right' if page_name=='home' else 'hero-sub--left' }}">
+    <div class="hero-sub {{ 'hero-sub--right' if page_name=='home' else 'hero-sub--center' if page_name=='service' else 'hero-sub--left' }}">
         {{ caller() }}
     </div>
 

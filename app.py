@@ -18,13 +18,14 @@ from wtforms.validators import DataRequired
 
 import config
 from detector.actions import get_action_log, rename_file, trash_file
-from detector.service import find_duplicates
+from detector.service import find_duplicates, find_duplicates_from_uploads
 
 # ── App setup ──────────────────────────────────────────────────────────────
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = config.SECRET_KEY
 app.config["WTF_CSRF_ENABLED"] = True
+app.config["MAX_CONTENT_LENGTH"] = config.MAX_UPLOAD_SIZE
 
 csrf = CSRFProtect(app)
 
@@ -66,16 +67,32 @@ def service():
     result = None
     scan_id = None
 
-    if form.validate_on_submit():
-        folder = form.folder.data.strip()
-        result = find_duplicates(folder, min_size=config.MIN_FILE_SIZE)
-
-        if result.error:
-            flash(result.error, "error")
-        else:
-            scan_id = _store_scan(result)
-            if result.group_count == 0:
-                flash("No duplicate files found. Your folder is clean ✓", "info")
+    if request.method == "POST":
+        if request.form.get("upload_mode") == "1":
+            # ── File-upload mode ─────────────────────────────────────────────
+            uploaded = request.files.getlist("folder_files")
+            # Filter out the empty sentinel Werkzeug adds when no file chosen
+            uploaded = [f for f in uploaded if f.filename]
+            if not uploaded:
+                flash("No files received. Please choose a folder and try again.", "error")
+            else:
+                result = find_duplicates_from_uploads(uploaded, min_size=config.MIN_FILE_SIZE)
+                if result.error:
+                    flash(result.error, "error")
+                else:
+                    scan_id = _store_scan(result)
+                    if result.group_count == 0:
+                        flash("No duplicate files found in the uploaded folder ✓", "info")
+        elif form.validate_on_submit():
+            # ── Path mode (existing) ─────────────────────────────────────────
+            folder = form.folder.data.strip()
+            result = find_duplicates(folder, min_size=config.MIN_FILE_SIZE)
+            if result.error:
+                flash(result.error, "error")
+            else:
+                scan_id = _store_scan(result)
+                if result.group_count == 0:
+                    flash("No duplicate files found. Your folder is clean ✓", "info")
 
     return render_template("service.html", form=form, result=result, scan_id=scan_id)
 
@@ -155,8 +172,20 @@ def about():
     return render_template("about.html")
 
 
+@app.errorhandler(413)
+def upload_too_large(e):
+    flash(
+        f"Upload too large. The folder exceeds the {config.MAX_UPLOAD_SIZE // (1024*1024)} MB limit. "
+        "Use the 'Type Path' mode instead to scan large folders without uploading.",
+        "error",
+    )
+    return redirect(url_for("service"))
+
+
 # ── Entry point ───────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    # Bind to localhost only – never 0.0.0.0
-    app.run(host="127.0.0.1", port=5000, debug=False)
+    # 0.0.0.0 makes Flask reachable on all network interfaces (including
+    # your phone on the same Wi-Fi).  Access it at http://<laptop-IP>:5000
+    # Find your IP: run  ipconfig  (Windows) or  ip a  (Linux/macOS).
+    app.run(host="0.0.0.0", port=5000, debug=False)

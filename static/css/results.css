@@ -9,6 +9,17 @@
     padding: 40px 40px 60px;
 }
 
+/* ── Upload-mode notice ── */
+.upload-notice {
+    background: var(--info-bg);
+    color: var(--info-text);
+    border-radius: var(--radius-card);
+    padding: 14px 20px;
+    font-size: .88rem;
+    line-height: 1.6;
+    margin-bottom: 28px;
+}
+
 /* ── Summary bar ── */
 .summary-bar {
     display: flex;
@@ -273,10 +284,25 @@
 }
 
 /* ── Responsive ── */
-@media (max-width: 700px) {
-    .results-section { padding: 24px 16px 40px; }
-    .summary-bar { flex-direction: column; }
-    .stat-tile { flex: 1 1 auto; }
-    .pipeline { flex-direction: column; }
-    .pipeline-arrow { transform: rotate(90deg); align-self: flex-start; margin-left: 20px; }
+@media (max-width: 768px) {
+    .results-section  { padding: 24px 16px 40px; }
+    .action-layout    { padding: 24px 16px 60px; }
+    .about-layout     { padding: 32px 16px 60px; }
+
+    /* Summary bar stacks vertically */
+    .summary-bar      { flex-direction: column; gap: 10px; }
+    .stat-tile        { flex: 1 1 auto; }
+
+    /* Groups and cards: reduce side padding */
+    .group-card-header { padding: 12px 14px; gap: 8px; }
+    .file-row          { padding: 10px 14px; gap: 8px; }
+    .action-file-row   { padding: 10px 14px; gap: 8px; }
+
+    /* About page: pipeline wraps vertically */
+    .pipeline         { flex-direction: column; gap: 6px; }
+    .pipeline-arrow   { transform: rotate(90deg); align-self: flex-start; margin-left: 20px; }
+
+    /* About page: smaller h1 */
+    .about-layout h1  { font-size: 1.8rem; }
+    .about-layout h2  { font-size: .95rem; margin: 24px 0 10px; }
 }

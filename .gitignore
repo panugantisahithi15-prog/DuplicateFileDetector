@@ -27,3 +27,7 @@ Thumbs.db
 
 # Project specific
 docs/design/
+main.py
+static/style.css
+"static/Reference  Images/"
+static/Reference*/

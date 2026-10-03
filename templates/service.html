@@ -5,37 +5,97 @@
 
 {% block content %}
 
-{# ── Hero with bare scan form (no card, just label + input + button) ── #}
+{# ── Hero: scan form (Browse mode default, Path mode on toggle) ── #}
 {% call hero("service") %}
-    <form method="POST" id="scan-form" class="scan-form-bare" novalidate>
-        {{ form.hidden_tag() }}
+<div class="scan-form-bare" id="scan-root">
 
-        <p class="path-label">Folder path :</p>
+    {# ─── Browse panel (default) ─── #}
+    {% set show_path = form.folder.data or form.folder.errors %}
+    <div id="browse-panel" {% if show_path %}style="display:none"{% endif %}>
 
-        {{ form.folder(
-            id="folder",
-            class="path-input",
-            placeholder="e.g. C:\\Users\\You\\Pictures",
-            autocomplete="off",
-            value=form.folder.data or ""
-        ) }}
+        {# Invisible file input lives inside its own form so it submits properly #}
+        <form method="POST"
+              enctype="multipart/form-data"
+              id="upload-form"
+              style="display:none;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="upload_mode" value="1">
+            <input type="file"
+                   id="folder-input"
+                   name="folder_files"
+                   webkitdirectory
+                   multiple>
+        </form>
 
-        {% if form.folder.errors %}
-            {% for err in form.folder.errors %}
-            <p style="font-size:.8rem;color:var(--error-text);margin-top:-6px;">{{ err }}</p>
-            {% endfor %}
-        {% endif %}
+        {# Step 1: pick button #}
+        <button type="button" id="browse-btn" class="scan-btn">
+            📁 Choose Folder
+        </button>
 
-        <button type="submit" class="scan-btn" id="scan-btn">
+        {# Step 2: selected folder info (hidden until selection) #}
+        <div id="folder-info" class="folder-info" style="display:none;">
+            <span id="folder-name-text" class="folder-name-text"></span>
+            <span id="file-count-badge" class="file-count-badge"></span>
+        </div>
+
+        {# Step 3: scan button appears after selection #}
+        <button type="button"
+                id="upload-scan-btn"
+                class="scan-btn"
+                style="display:none;"
+                disabled>
             <span class="spinner" aria-hidden="true"></span>
             <span class="btn-text">Scan</span>
         </button>
-    </form>
+
+        <button type="button" class="mode-link" id="show-path-btn">
+            or type a path manually →
+        </button>
+    </div>
+
+    {# ─── Path panel (hidden by default, shown if form has data/errors) ─── #}
+    <div id="path-panel" {% if not show_path %}style="display:none"{% endif %}>
+        <form method="POST" id="scan-form" novalidate>
+            {{ form.hidden_tag() }}
+            <p class="path-label">Folder path :</p>
+            {{ form.folder(
+                id="folder",
+                class="path-input",
+                placeholder="e.g. C:\\Users\\You\\Pictures",
+                autocomplete="off",
+                value=form.folder.data or ""
+            ) }}
+            {% if form.folder.errors %}
+                {% for err in form.folder.errors %}
+                <p style="font-size:.8rem;color:var(--error-text);margin-top:-6px;">{{ err }}</p>
+                {% endfor %}
+            {% endif %}
+            <button type="submit" class="scan-btn" id="scan-btn">
+                <span class="spinner" aria-hidden="true"></span>
+                <span class="btn-text">Scan</span>
+            </button>
+        </form>
+        <button type="button" class="mode-link" id="show-browse-btn">
+            ← pick a folder instead
+        </button>
+    </div>
+
+</div>
 {% endcall %}
 
 {# ── Results section (appears after a successful scan) ── #}
 {% if result is not none %}
 <div class="results-section" id="results-section">
+
+    {# ── Upload-mode notice ── #}
+    {% if result.upload_mode %}
+    <div class="upload-notice">
+        📤 <strong>File upload mode</strong> — duplicate detection ran on the uploaded
+        copies. Paths shown are relative to the folder you selected.
+        To trash or rename originals, use <em>Type Path</em> mode so the app can
+        reach the real files on disk.
+    </div>
+    {% endif %}
 
     {# ── Error ── #}
     {% if result.error %}
@@ -81,11 +141,17 @@
         <h2 style="font-size:1.2rem;font-weight:800;letter-spacing:-.02em;">
             {{ result.group_count }} duplicate group{{ 's' if result.group_count != 1 }}
         </h2>
-        {% if scan_id %}
+        {% if scan_id and not result.upload_mode %}
         <a href="{{ url_for('action', scan_id=scan_id) }}"
            class="btn btn-primary" style="font-size:.85rem;padding:8px 20px;">
             Manage all →
         </a>
+        {% elif scan_id and result.upload_mode %}
+        <span class="btn btn-primary"
+              style="font-size:.85rem;padding:8px 20px;opacity:.45;cursor:not-allowed;"
+              title="Manage actions require path mode — re-scan using Type Path.">
+            Manage all (unavailable)
+        </span>
         {% endif %}
     </div>
 
@@ -98,7 +164,7 @@
                     {{ group.count }} copies &middot; {{ group.files[0].size_human }} each
                 </span>
                 <span class="wasted-badge">{{ group.wasted_human }} wasted</span>
-                {% if scan_id %}
+                {% if scan_id and not result.upload_mode %}
                 <a href="{{ url_for('action', scan_id=scan_id, group_id=group.group_id) }}"
                    class="btn btn-primary manage-btn">Manage →</a>
                 {% endif %}

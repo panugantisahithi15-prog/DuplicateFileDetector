@@ -91,6 +91,7 @@ class ScanResult:
     duration_seconds: float = 0.0
     skipped: List[SkippedFile] = field(default_factory=list)
     error: Optional[str] = None   # top-level error (bad path, permission, etc.)
+    upload_mode: bool = False      # True when result came from browser file upload
 
     @property
     def group_count(self) -> int:

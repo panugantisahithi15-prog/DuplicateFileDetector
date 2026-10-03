@@ -1,19 +1,20 @@
 {% extends "base.html" %}
+{% from "partials/_hero.html" import hero %}
 
 {% block title %}About – Duplicate File Manager{% endblock %}
 
 {% block content %}
-<div class="about-layout">
-
-    <!-- Minimal navbar -->
-    <div class="navbar-wrap" style="margin-bottom:40px;">
-        <nav class="navbar" aria-label="Main navigation">
-            <a href="{{ url_for('home') }}">Home</a>
-            <a href="{{ url_for('service') }}">Service</a>
-            <a href="{{ url_for('action') }}">Action</a>
-            <a href="{{ url_for('about') }}" class="active">About</a>
-        </nav>
+{% call hero("about") %}
+    <!-- Info card – left side -->
+    <div class="info-card">
+        <div class="info-card-row"><span class="highlight-badge">Content-based detection</span></div>
+        <div class="info-card-row">MD5 multi-stage pipeline</div>
+        <div class="info-card-row">Recycle Bin safe-delete</div>
     </div>
+{% endcall %}
+
+<!-- ── About content (scrolls below hero) ── -->
+<div class="about-layout">
 
     <h1>Duplicate File Manager</h1>
     <p class="tagline">
