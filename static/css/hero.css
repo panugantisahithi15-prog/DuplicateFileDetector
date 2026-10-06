@@ -91,7 +91,10 @@
 
 .hero-sub--right  { justify-content: flex-end; }
 .hero-sub--left   { justify-content: flex-start; }
-.hero-sub--center { justify-content: center; }
+.hero-sub--center {
+    justify-content: center;
+    min-height: 140px;
+}
 
 /* ── Info card ──────────────────────────────────────────────*/
 .info-card {
@@ -299,16 +302,6 @@
     box-shadow: 0 -12px 40px rgba(100, 160, 215, 0.35);
 }
 
-/* ── Service page: fix pocket to match Home ─────────────────
-   .hero-sub--center is only set on the service page (see macro).
-   Using it as a sibling anchor avoids any HTML change and keeps
-   this rule from affecting Home, Action, or About.              */
-.hero-sub--center ~ .bottom-section {
-    justify-content: flex-end;
-}
-.hero-sub--center ~ .bottom-section .folder-pocket {
-    flex: 0 0 140px;
-}
 
 /* ── Tablet: 769px – 1024px ─────────────────────────────────
    Point 7: reduce image + heading size, tighten spacing.    */
@@ -356,6 +349,7 @@
     /* ── Scan form (service page) ── */
     .scan-form-bare     { max-width: 100%; }
     .scan-form-bare .path-input { padding: 9px 16px; font-size: .9rem; }
+    .hero-sub--center   { min-height: 0; }
 
     /* ── Bottom section: push photos + pocket to the bottom ── */
     .bottom-section     {
